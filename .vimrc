@@ -16,11 +16,14 @@ Plugin 'christoomey/vim-system-copy'
 Plugin 'arzg/vim-substrata'
 
 Plugin 'elixir-editors/vim-elixir'
-Plugin 'slashmili/alchemist.vim'
+" Plugin 'slashmili/alchemist.vim'
 
 Plugin 'vim-scripts/ReplaceWithRegister'
 
 Plugin 'benmills/vimux'
+
+Plugin 'junegunn/fzf', { 'do': './install --bin' }
+Plugin 'junegunn/fzf.vim'
 
 " Stat
 " Plugin 'wakatime/vim-wakatime'
@@ -118,3 +121,49 @@ if bufwinnr(1)
 	map - <C-W>-
 endif
 
+let c='a'
+while c <= 'z'
+  exec "set <A-".c.">=\e".c
+  exec "imap \e".c." <A-".c.">"
+  let c = nr2char(1+char2nr(c))
+endw
+
+set timeout ttimeoutlen=50
+
+nnoremap <A-j> :m .+1<CR>==
+nnoremap <A-k> :m .-2<CR>==
+inoremap <A-j> <Esc>:m .+1<CR>==gi
+inoremap <A-k> <Esc>:m .-2<CR>==gi
+vnoremap <A-j> :m '>+1<CR>gv=gv
+vnoremap <A-k> :m '<-2<CR>gv=gv
+
+if executable('fzf')
+  " FZF {{{
+  " <C-p> or <C-t> to search files
+  nnoremap <silent> <C-t> :FZF -m<cr>
+  nnoremap <silent> <C-p> :FZF -m<cr>
+
+  " <M-p> for open buffers
+  nnoremap <silent> <M-p> :Buffers<cr>
+
+  " <M-S-p> for MRU
+  nnoremap <silent> <M-S-p> :History<cr>
+
+  " Use fuzzy completion relative filepaths across directory
+  imap <expr> <c-x><c-f> fzf#vim#complete#path('git ls-files $(git rev-parse --show-toplevel)')
+
+  " Better command history with q:
+  command! CmdHist call fzf#vim#command_history({'right': '40'})
+  nnoremap q: :CmdHist<CR>
+
+  " Better search history
+  command! QHist call fzf#vim#search_history({'right': '40'})
+  nnoremap q/ :QHist<CR>
+
+  command! -bang -nargs=* Ack call fzf#vim#ag(<q-args>, {'down': '40%', 'options': --no-color'})
+  " }}}
+else
+  " CtrlP fallback
+end
+
+set list
